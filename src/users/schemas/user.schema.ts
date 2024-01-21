@@ -21,6 +21,8 @@ const validateEmail = (email: string) => {
 export class UsersSchama {
   @Prop({ type: String, enum: UserTypeEnum, default: UserTypeEnum.candidate })
   userType: UserTypeEnum;
+  @Prop({ type: Boolean, default: false })
+  email_enabled: boolean;
   @Prop({ type: Boolean, default: true })
   enabled: boolean;
   @Prop({ unique: true, required: true })
@@ -46,6 +48,13 @@ export class UsersSchama {
    * **/
   checkPassword!: (password: string) => Promise<boolean>;
 }
+@ObjectType()
+export class PasswordResetDocument {
+  @Field()
+  token: string;
+  @Field()
+  expiration: Date;
+}
 
 @ObjectType()
 export class UsersDocument extends Document {
@@ -53,6 +62,8 @@ export class UsersDocument extends Document {
   userType: string;
   @Field()
   enabled: boolean;
+  @Field()
+  email_enabled: boolean;
   @Field()
   password: string;
   @Field()
@@ -62,7 +73,7 @@ export class UsersDocument extends Document {
   @Field()
   username: string;
   @Field(() => GraphQLJSONObject)
-  passwordReset?: object;
+  passwordReset?: PasswordResetDocument;
 }
 
 const UsersModel = SchemaFactory.createForClass(UsersSchama);

@@ -5,10 +5,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { UpdateUserInput } from './args/UpdateUserInput.args';
 import { MongoError } from 'mongodb';
 import { CreateUserInput } from './args/CreateUserInput.args';
+import { randomBytes } from 'crypto';
+import { ConfigService } from '@nestjs/config';
+import { createTransport, SendMailOptions } from 'nodemailer';
 @Injectable()
 class UsersService {
   constructor(
     @InjectModel('User') private readonly userModel: Model<UsersDocument>,
+    private configService: ConfigService,
   ) {}
 
   isEmployer(user: UsersDocument): boolean {
@@ -117,6 +121,93 @@ class UsersService {
       }
     }
     throw new Error(error.message);
+  }
+  /**
+   *  Send an email with a password reset code and sets the reset token and expiration on the user.
+   * Email_Enabled must be true for this to run
+   *
+   * @param {string} email address associated with an account to reset
+   * @returns {Promise<boolean>} if an email was sent or not
+   * @memberof UsersService
+   *
+   **/
+  async forgotPassword(email: string): Promise<boolean> {
+    const user = await this.findOneByEmail(email);
+    if (!user) return false;
+    if (!user.enabled) return false;
+    const token = randomBytes(64).toString('hex');
+    // one day for expiration of reset token
+    const expiration = new Date(Date().valueOf() + 24 * 60 * 60 * 1000);
+    const transporter = createTransport({
+      host: 'smtp.forwardemail.net',
+      port: 465,
+      secure: true,
+      auth: {
+        user: this.configService.get('EMAIL_USER'),
+        pass: this.configService.get('EMAIL_PASS'),
+      },
+    });
+    const mailOptions: SendMailOptions = {
+      from: this.configService.get('EMAIL_USER'),
+      to: email,
+      subject: `Reset Password`,
+      text: `${user.username}, Replace your password with this : ${token}`,
+    };
+    return new Promise((resolve, reject) => {
+      transporter.sendMail(mailOptions, (error, _) => {
+        if (error) return resolve(false);
+        user.passwordReset = { token, expiration };
+        user.save().then(
+          () => resolve(true),
+          () => reject(false),
+        );
+      });
+    });
+  }
+
+  /**
+   * Creates a user
+   *
+   * @param {CreateUserInput} createUserInput username,email and password. Username and email must be unique, will throw an email with a description if either are
+   * duplicates
+   * @returns {Promise<UsersDocument>} or throws an error
+   * @memberof UsersService
+   *
+   **/
+  async createUser(createUserInput: CreateUserInput): Promise<UsersDocument> {
+    let newUser: UsersDocument | undefined;
+    try {
+      newUser = await this.userModel.create(createUserInput);
+    } catch (error) {
+      throw this.evaluateMongoError(error, createUserInput);
+    }
+    return newUser;
+  }
+  /***
+   *  Resets a password after the user forgot their passwordand requested a reset
+   *
+   * @param {string} username
+   * @param {string} code the token set when the password reset email was sent out
+   * @param {string} password the new password the user wants
+   * @returns {(Promise<UserDocument| undefined>)} Returns undefined if the code or the username is wrong
+   * @memberof UsersService
+   *
+   **/
+  async resetPassword(
+    username: string,
+    code: string,
+    password: string,
+  ): Promise<UsersDocument | undefined> {
+    const user = await this.findOneByUsername(username);
+    if (!!user && user.passwordReset && user.enabled !== false) {
+      if (user.passwordReset.token === code) {
+        user.password = password;
+        user.passwordReset = undefined;
+        await user.save();
+        return user;
+      }
+    }
+    return undefined;
   }
 }
 
