@@ -1,0 +1,22 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type UsersDocument {
+  userType: String!
+  enabled: Boolean!
+  password: String!
+  lowercaseUsername: String!
+  lowercaseEmail: String!
+  username: String!
+  passwordReset: JSONObject!
+}
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
+type Query {
+  users: [UsersDocument!]!
+}
