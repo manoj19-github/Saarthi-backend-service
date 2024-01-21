@@ -30,10 +30,6 @@ import { UsersModule } from './users/users.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         uri: configService.get('DATABASE_URL'),
-        // useNewUrlParser: true,
-        // useCreateIndex: true,
-        // useFindAndModify: false,
-        // useUnifiedTopology: true,
       }),
       inject: [ConfigService],
     }),
