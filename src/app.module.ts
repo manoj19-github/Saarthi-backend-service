@@ -14,7 +14,7 @@ import { UsersModule } from './users/users.module';
   imports: [
     GraphQLModule.forRoot({
       driver: ApolloDriver,
-      playground: process.env.NODE_ENV === 'development',
+      playground: true,
       autoSchemaFile: join(process.cwd(), 'src/schema.graphql'),
       definitions: {
         path: join(process.cwd(), 'src/schema.ts'),
@@ -24,7 +24,6 @@ import { UsersModule } from './users/users.module';
 
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env.local',
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

@@ -8,6 +8,8 @@ import { CreateUserInput } from './args/CreateUserInput.args';
 import { randomBytes } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { createTransport, SendMailOptions } from 'nodemailer';
+import * as bcrypt from 'bcrypt';
+
 @Injectable()
 class UsersService {
   constructor(
@@ -42,9 +44,7 @@ class UsersService {
    * @memberof UsersService
    **/
   async findOneByEmail(email: string): Promise<UsersDocument | undefined> {
-    const user = await this.userModel
-      .findOne({ lowercaseEmail: email.toLowerCase() })
-      .exec();
+    const user = await this.userModel.findOne({ email }).exec();
     if (user) return user;
     return undefined;
   }
@@ -133,34 +133,46 @@ class UsersService {
    **/
   async forgotPassword(email: string): Promise<boolean> {
     const user = await this.findOneByEmail(email);
+    console.log('user: ', user);
     if (!user) return false;
     if (!user.enabled) return false;
-    const token = randomBytes(64).toString('hex');
+    const token = randomBytes(10).toString('hex');
     // one day for expiration of reset token
     const expiration = new Date(Date().valueOf() + 24 * 60 * 60 * 1000);
     const transporter = createTransport({
-      host: 'smtp.forwardemail.net',
+      host: 'smtp.gmail.com',
+      secureConnection: false, // TLS requires secureConnection to be false
       port: 465,
       secure: true,
       auth: {
-        user: this.configService.get('EMAIL_USER'),
-        pass: this.configService.get('EMAIL_PASS'),
+        user: this.configService.get('EMAIL_USERNAME'),
+        pass: this.configService.get('EMAIL_PASSWORD'),
+      },
+      tls: {
+        rejectUnAuthorized: true,
       },
     });
     const mailOptions: SendMailOptions = {
-      from: this.configService.get('EMAIL_USER'),
+      from: this.configService.get('EMAIL_USERNAME'),
       to: email,
       subject: `Reset Password`,
       text: `${user.username}, Replace your password with this : ${token}`,
     };
     return new Promise((resolve, reject) => {
       transporter.sendMail(mailOptions, (error, _) => {
+        console.log('error: ', error);
         if (error) return resolve(false);
+
         user.passwordReset = { token, expiration };
-        user.save().then(
-          () => resolve(true),
-          () => reject(false),
-        );
+        this.userModel
+          .updateOne(
+            { email },
+            { $set: { passwordReset: { token, expiration } } },
+          )
+          .then(
+            () => resolve(true),
+            () => reject(false),
+          );
       });
     });
   }
@@ -177,8 +189,18 @@ class UsersService {
   async createUser(createUserInput: CreateUserInput): Promise<UsersDocument> {
     let newUser: UsersDocument | undefined;
     try {
-      newUser = await this.userModel.create(createUserInput);
-    } catch (error) {
+      const salt = await bcrypt.genSalt(10);
+      createUserInput.password = await bcrypt.hash(
+        createUserInput.password,
+        salt,
+      );
+      const lowercaseUsername = createUserInput.username.toLowerCase();
+      newUser = await this.userModel.create({
+        ...createUserInput,
+        lowercaseUsername,
+      });
+    } catch (error: any) {
+      console.log('ewrror ', error);
       throw this.evaluateMongoError(error, createUserInput);
     }
     return newUser;
@@ -201,7 +223,9 @@ class UsersService {
     const user = await this.findOneByUsername(username);
     if (!!user && user.passwordReset && user.enabled !== false) {
       if (user.passwordReset.token === code) {
-        user.password = password;
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        user.password = hashedPassword;
         user.passwordReset = undefined;
         await user.save();
         return user;

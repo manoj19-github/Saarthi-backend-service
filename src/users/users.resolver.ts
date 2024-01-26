@@ -1,8 +1,11 @@
-import { Resolver, Query, Args } from '@nestjs/graphql';
+import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
 
 import UsersService from './users.service';
 import { UsersDocument } from './schemas/user.schema';
 import { UserInputError, ValidationError } from 'apollo-server-core';
+import { CreateUserInput } from './args/CreateUserInput.args';
+import { ValidationPipe } from '@nestjs/common';
+import { boolean } from 'joi';
 
 @Resolver((of) => UsersDocument)
 class UserResolver {
@@ -27,9 +30,16 @@ class UserResolver {
     if (user) return user;
     throw new UserInputError('The user does not exists');
   }
-  @Query((returns) => Boolean, { name: 'forgotPassword' })
+  @Query(() => Boolean, { name: 'forgotPassword' })
   async forgotPassword(@Args('email') email: string): Promise<boolean> {
     return await this.userService.forgotPassword(email);
+  }
+  @Mutation(() => UsersDocument, { name: 'createUser' })
+  async createUser(
+    @Args('createUserInput', new ValidationPipe())
+    createUserInput: CreateUserInput,
+  ): Promise<UsersDocument> {
+    return await this.userService.createUser(createUserInput);
   }
 }
 

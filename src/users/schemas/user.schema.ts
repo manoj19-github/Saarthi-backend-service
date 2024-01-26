@@ -3,7 +3,7 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { GraphQLJSONObject } from 'graphql-type-json';
 export enum UserTypeEnum {
   candidate = 'candidate',
@@ -37,8 +37,6 @@ export class UsersSchama {
   username: string;
   @Prop({ unique: true })
   lowercaseUsername: string;
-  @Prop({ unique: true })
-  lowercaseEmail: number;
   @Prop({ type: { token: String, expiration: Date } })
   passwordReset?: { token: string; expiration: Date };
   /**
@@ -69,33 +67,11 @@ export class UsersDocument extends Document {
   @Field()
   lowercaseUsername: string;
   @Field()
-  lowercaseEmail: string;
-  @Field()
   username: string;
   @Field(() => GraphQLJSONObject)
   passwordReset?: PasswordResetDocument;
 }
-
 const UsersModel = SchemaFactory.createForClass(UsersSchama);
-// UsersModel.methods.checkPassword = function (this: any) {
-//     const user = this;
-//     user.lo
-// };
-
-UsersModel.pre('save', function (next) {
-  const user = this;
-  user.lowercaseUsername = user.username.toLowerCase();
-  user.lowercaseUsername = user.email.toLowerCase();
-  if (!user.isModified('password')) return next();
-  bcrypt.genSalt(10, (genSaltError, salt) => {
-    if (genSaltError) return next(genSaltError);
-    bcrypt.hash(user.password, salt, (error, hash) => {
-      if (error) return next(error);
-      user.password = hash;
-      next();
-    });
-  });
-});
 
 UsersModel.methods.checkPassword = function (
   password: string,

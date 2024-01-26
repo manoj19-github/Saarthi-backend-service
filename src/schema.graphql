@@ -8,7 +8,6 @@ type UsersDocument {
   email_enabled: Boolean!
   password: String!
   lowercaseUsername: String!
-  lowercaseEmail: String!
   username: String!
   passwordReset: JSONObject!
 }
@@ -22,4 +21,14 @@ type Query {
   users: [UsersDocument!]!
   user(username: String!, email: String!): UsersDocument!
   forgotPassword(email: String!): Boolean!
+}
+
+type Mutation {
+  createUser(createUserInput: CreateUserInput!): UsersDocument!
+}
+
+input CreateUserInput {
+  username: String!
+  email: String!
+  password: String!
 }
