@@ -6,10 +6,14 @@ type UsersDocument {
   userType: String!
   enabled: Boolean!
   email_enabled: Boolean!
+  is_registered: Boolean!
+  email: String!
   password: String!
   lowercaseUsername: String!
   username: String!
   passwordReset: JSONObject!
+  emailReset: JSONObject!
+  validateEmail: JSONObject!
 }
 
 """
@@ -21,14 +25,29 @@ type Query {
   users: [UsersDocument!]!
   user(username: String!, email: String!): UsersDocument!
   forgotPassword(email: String!): Boolean!
+  changeEmailAddress(email: String!): Boolean!
 }
 
 type Mutation {
   createUser(createUserInput: CreateUserInput!): UsersDocument!
+  resetPassword(resetPasswordInput: ResetPasswordInput!): UsersDocument!
+  resetEmailAddress(resetEmailInput: ResetEmailInput!): UsersDocument!
 }
 
 input CreateUserInput {
   username: String!
   email: String!
   password: String!
+}
+
+input ResetPasswordInput {
+  email: String!
+  code: String!
+  password: String!
+}
+
+input ResetEmailInput {
+  oldEmail: String!
+  newEmail: String!
+  code: String!
 }

@@ -23,6 +23,8 @@ export class UsersSchama {
   userType: UserTypeEnum;
   @Prop({ type: Boolean, default: false })
   email_enabled: boolean;
+  @Prop({ type: Boolean, default: false })
+  is_registered: boolean;
   @Prop({ type: Boolean, default: true })
   enabled: boolean;
   @Prop({ unique: true, required: true })
@@ -39,15 +41,27 @@ export class UsersSchama {
   lowercaseUsername: string;
   @Prop({ type: { token: String, expiration: Date } })
   passwordReset?: { token: string; expiration: Date };
-  /**
-   *  checkes if user password provided matches the users password hashes
-   * @param {string} password the password to attempt
-   * @returns {Promise<boolean>} result of the match. will thrown an error if one exists from bcrypt
-   * **/
-  checkPassword!: (password: string) => Promise<boolean>;
+  @Prop({ type: { token: String, expiration: Date } })
+  emailReset?: { token: string; expiration: Date };
+  @Prop({ type: { token: String, expiration: Date } })
+  validateEmail?: { token: string; expiration: Date };
 }
 @ObjectType()
 export class PasswordResetDocument {
+  @Field()
+  token: string;
+  @Field()
+  expiration: Date;
+}
+@ObjectType()
+export class ValidateEmailDocument {
+  @Field()
+  token: string;
+  @Field()
+  expiration: Date;
+}
+@ObjectType()
+export class EmailResetDocument {
   @Field()
   token: string;
   @Field()
@@ -63,13 +77,22 @@ export class UsersDocument extends Document {
   @Field()
   email_enabled: boolean;
   @Field()
+  @Field()
+  email: string;
+  @Field()
   password: string;
+  @Field()
+  is_registered: boolean;
   @Field()
   lowercaseUsername: string;
   @Field()
   username: string;
   @Field(() => GraphQLJSONObject)
   passwordReset?: PasswordResetDocument;
+  @Field(() => GraphQLJSONObject)
+  emailReset?: EmailResetDocument;
+  @Field(() => GraphQLJSONObject)
+  validateEmail?: ValidateEmailDocument;
 }
 const UsersModel = SchemaFactory.createForClass(UsersSchama);
 

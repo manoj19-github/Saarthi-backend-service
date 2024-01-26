@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { UserTypeEnum, UsersDocument } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
@@ -9,12 +9,14 @@ import { randomBytes } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { createTransport, SendMailOptions } from 'nodemailer';
 import * as bcrypt from 'bcrypt';
+import { UtilityService } from 'src/utility/utility.service';
 
 @Injectable()
 class UsersService {
   constructor(
     @InjectModel('User') private readonly userModel: Model<UsersDocument>,
     private configService: ConfigService,
+    private utilityService: UtilityService,
   ) {}
 
   isEmployer(user: UsersDocument): boolean {
@@ -133,42 +135,59 @@ class UsersService {
    **/
   async forgotPassword(email: string): Promise<boolean> {
     const user = await this.findOneByEmail(email);
-    console.log('user: ', user);
+
     if (!user) return false;
     if (!user.enabled) return false;
     const token = randomBytes(10).toString('hex');
     // one day for expiration of reset token
     const expiration = new Date(Date().valueOf() + 24 * 60 * 60 * 1000);
-    const transporter = createTransport({
-      host: 'smtp.gmail.com',
-      secureConnection: false, // TLS requires secureConnection to be false
-      port: 465,
-      secure: true,
-      auth: {
-        user: this.configService.get('EMAIL_USERNAME'),
-        pass: this.configService.get('EMAIL_PASSWORD'),
-      },
-      tls: {
-        rejectUnAuthorized: true,
-      },
-    });
+
     const mailOptions: SendMailOptions = {
       from: this.configService.get('EMAIL_USERNAME'),
       to: email,
       subject: `Reset Password`,
-      text: `${user.username}, Replace your password with this : ${token}`,
+      text: `${user.username}, Replace your password with this : ${token} \n please note this token is invalid after 24 hours of generate `,
     };
     return new Promise((resolve, reject) => {
-      transporter.sendMail(mailOptions, (error, _) => {
-        console.log('error: ', error);
-        if (error) return resolve(false);
-
-        user.passwordReset = { token, expiration };
+      return this.utilityService.sendMailMethod(mailOptions).then((res) => {
         this.userModel
           .updateOne(
             { email },
             { $set: { passwordReset: { token, expiration } } },
           )
+          .then(
+            () => resolve(true),
+            () => reject(false),
+          );
+      });
+    });
+  }
+  /**
+   *  Change user email  verification
+   *  @param {string}
+   * @returns {boolean}
+   * @memberof UsersService
+   *
+   *
+   **/
+  async changeUserEmailVerification(email: string): Promise<boolean> {
+    const user = await this.findOneByEmail(email);
+
+    if (!user) return false;
+    if (!user.enabled) return false;
+    const token = randomBytes(10).toString('hex');
+    // one day for expiration of reset token
+    const expiration = new Date(Date().valueOf() + 24 * 60 * 60 * 1000);
+    const mailOptions: SendMailOptions = {
+      from: this.configService.get('EMAIL_USERNAME'),
+      to: email,
+      subject: `Reset Email Address`,
+      text: `${user.username}, Replace your password with this : ${token} \n please note this token is invalid after 24 hours of generate `,
+    };
+    return new Promise((resolve, reject) => {
+      return this.utilityService.sendMailMethod(mailOptions).then((res) => {
+        this.userModel
+          .updateOne({ email }, { $set: { emailReset: { token, expiration } } })
           .then(
             () => resolve(true),
             () => reject(false),
@@ -200,7 +219,6 @@ class UsersService {
         lowercaseUsername,
       });
     } catch (error: any) {
-      console.log('ewrror ', error);
       throw this.evaluateMongoError(error, createUserInput);
     }
     return newUser;
@@ -216,12 +234,16 @@ class UsersService {
    *
    **/
   async resetPassword(
-    username: string,
+    email: string,
     code: string,
     password: string,
   ): Promise<UsersDocument | undefined> {
-    const user = await this.findOneByUsername(username);
+    const user = await this.findOneByEmail(email);
     if (!!user && user.passwordReset && user.enabled !== false) {
+      if (
+        new Date().getTime() > new Date(user.passwordReset.expiration).getTime()
+      )
+        throw new BadRequestException('token expired');
       if (user.passwordReset.token === code) {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -229,9 +251,96 @@ class UsersService {
         user.passwordReset = undefined;
         await user.save();
         return user;
-      }
+      } else throw new BadRequestException('invalid token');
     }
     return undefined;
+  }
+  /**
+   *  Change User Email Address
+   * @param {string} the old email address what you want to change
+   * @param {string} the reset token to validate
+   * @param {string} the new email address what you want
+   * @returns {Promise<UsersDocument | undefined>}  returns undefined if the code
+   * @memberof UsersService
+   **/
+  async changeUserEmailAddress(
+    oldEmail: string,
+    code: string,
+    newEmail: string,
+  ): Promise<UsersDocument> {
+    const user = await this.findOneByEmail(oldEmail);
+    if (!!user && user.emailReset && user.enabled !== false) {
+      if (
+        new Date().getTime() > new Date(user.passwordReset.expiration).getTime()
+      )
+        throw new BadRequestException('token expired');
+      if (user.emailReset && user.emailReset.token === code) {
+        user.email = newEmail;
+        user.email_enabled = false;
+        await user.save();
+        return user;
+      } else throw new BadRequestException('invalid token');
+    }
+    return undefined;
+  }
+  /**
+   *  validate your email address
+   * @param{string} email address to validate
+   * @param{string} code to verify your email address
+   * @returns {Promise<UsersDocument|undefined>}
+   * @memberof{UsersService}
+   **/
+  async verifyEmailAddress(
+    email: string,
+    code: string,
+  ): Promise<UsersDocument> {
+    const user = await this.findOneByEmail(email);
+    if (!!user && user.validateEmail) {
+      if (
+        new Date().getTime() > new Date(user.validateEmail.expiration).getTime()
+      )
+        throw new BadRequestException('token expired');
+      if (user.validateEmail.token === code) {
+        user.email_enabled = true;
+        await user.save();
+        return user;
+      } else throw new BadRequestException('invalid token');
+    }
+    return undefined;
+  }
+  /**
+   *   validate user email address verification
+   * @params {string} user email address
+   * @returns {Promise<boolean>} return true if email sent otherwise false
+   * @memberof {UsersService}
+   *
+   **/
+  async validateEmailVerification(email: string): Promise<boolean> {
+    const user = await this.findOneByEmail(email);
+    if (!user) throw new BadRequestException('email address is not found');
+    if (user.enabled === false) return false;
+    const token = randomBytes(10).toString('hex');
+    // one day for expiration of reset token
+    const expiration = new Date(Date().valueOf() + 24 * 60 * 60 * 1000);
+    const mailOptions: SendMailOptions = {
+      from: this.configService.get('EMAIL_USERNAME'),
+      to: email,
+      subject: `Validate Email Address`,
+      text: `${user.username}, validate your email address : ${token} \n please note this token is invalid after 24 hours of generate `,
+    };
+    return new Promise((resolve, reject) => {
+      return this.utilityService.sendMailMethod(mailOptions).then((res) => {
+        this.userModel
+          .updateOne(
+            { email },
+            { $set: { validateEmail: { token, expiration } } },
+          )
+          .then(
+            () => resolve(true),
+            () => reject(false),
+          );
+      });
+    });
   }
 }
 
