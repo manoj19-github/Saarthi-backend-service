@@ -5,17 +5,11 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { GraphQLJSONObject } from 'graphql-type-json';
+import { Validators } from 'src/lib/validators';
 export enum UserTypeEnum {
   candidate = 'candidate',
   employer = 'employer',
 }
-
-const validateEmail = (email: string) => {
-  // tslint:disable-next-line:max-line-length
-  const expression =
-    /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-  return expression.test(email);
-};
 
 @Schema({ timestamps: true })
 export class UsersSchama {
@@ -32,7 +26,7 @@ export class UsersSchama {
   @Prop({
     required: true,
     unique: true,
-    validate: { validator: validateEmail },
+    validate: { validator: Validators.validateEmail },
   })
   email: string;
   @Prop({ required: true, unique: true })
@@ -45,6 +39,8 @@ export class UsersSchama {
   emailReset?: { token: string; expiration: Date };
   @Prop({ type: { token: String, expiration: Date } })
   validateEmail?: { token: string; expiration: Date };
+  @Prop({ type: [String] })
+  permission: string[];
 }
 @ObjectType()
 export class PasswordResetDocument {
@@ -93,6 +89,8 @@ export class UsersDocument extends Document {
   emailReset?: EmailResetDocument;
   @Field(() => GraphQLJSONObject)
   validateEmail?: ValidateEmailDocument;
+  @Field(() => [String])
+  permission: string[];
 }
 const UsersModel = SchemaFactory.createForClass(UsersSchama);
 
@@ -108,8 +106,5 @@ UsersModel.methods.checkPassword = function (
   });
 };
 
-UsersModel.statics.validateEmail = function (email: string): boolean {
-  return validateEmail(email);
-};
 
 export default UsersModel;

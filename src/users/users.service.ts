@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { UserTypeEnum, UsersDocument } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
@@ -7,10 +7,10 @@ import { MongoError } from 'mongodb';
 import { CreateUserInput } from './args/CreateUserInput.args';
 import { randomBytes } from 'crypto';
 import { ConfigService } from '@nestjs/config';
-import { createTransport, SendMailOptions } from 'nodemailer';
+import { SendMailOptions } from 'nodemailer';
 import * as bcrypt from 'bcrypt';
 import { UtilityService } from 'src/utility/utility.service';
-
+import { HttpQueryError } from 'apollo-server-core';
 @Injectable()
 class UsersService {
   constructor(
@@ -19,9 +19,6 @@ class UsersService {
     private utilityService: UtilityService,
   ) {}
 
-  isEmployer(user: UsersDocument): boolean {
-    return user.userType === UserTypeEnum.employer;
-  }
   /**
    * Returns a user by their unique username or undefined
    *
@@ -138,7 +135,7 @@ class UsersService {
 
     if (!user) return false;
     if (!user.enabled) return false;
-    const token = randomBytes(10).toString('hex');
+    const token = randomBytes(3).toString('hex');
     // one day for expiration of reset token
     const expiration = new Date(Date().valueOf() + 24 * 60 * 60 * 1000);
 
@@ -146,7 +143,17 @@ class UsersService {
       from: this.configService.get('EMAIL_USERNAME'),
       to: email,
       subject: `Reset Password`,
-      text: `${user.username}, Replace your password with this : ${token} \n please note this token is invalid after 24 hours of generate `,
+      html: `
+      
+      
+        <h1 style="text-align:center">Saarthi</h1><br/>
+        <p style="text-align:center"><small>Your Future, Our Commitment</small></p>
+      
+      
+        <p></p>
+        <p style="text-align:center">${user.username}, Replace your password with this : ${token} <br/><small> please note this token is invalid after 24 hours of generate</small> </p>
+      
+      `,
     };
     return new Promise((resolve, reject) => {
       return this.utilityService.sendMailMethod(mailOptions).then((res) => {
@@ -175,14 +182,20 @@ class UsersService {
 
     if (!user) return false;
     if (!user.enabled) return false;
-    const token = randomBytes(10).toString('hex');
+    const token = randomBytes(3).toString('hex');
     // one day for expiration of reset token
     const expiration = new Date(Date().valueOf() + 24 * 60 * 60 * 1000);
     const mailOptions: SendMailOptions = {
       from: this.configService.get('EMAIL_USERNAME'),
       to: email,
       subject: `Reset Email Address`,
-      text: `${user.username}, Replace your password with this : ${token} \n please note this token is invalid after 24 hours of generate `,
+      html: `
+      
+        <h1 style="text-align:center">Saarthi</h1><br/>
+        <p style="text-align:center"> <small>Your Future, Our Commitment</small></p>
+        <p></p>
+        <p style="text-align:center">${user.username}, Replace your email address with this : ${token} <br/><small> please note this token is invalid after 24 hours of generate</small> </p>
+      `,
     };
     return new Promise((resolve, reject) => {
       return this.utilityService.sendMailMethod(mailOptions).then((res) => {
@@ -243,7 +256,7 @@ class UsersService {
       if (
         new Date().getTime() > new Date(user.passwordReset.expiration).getTime()
       )
-        throw new BadRequestException('token expired');
+        throw new HttpQueryError(400, 'token expired');
       if (user.passwordReset.token === code) {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -251,7 +264,7 @@ class UsersService {
         user.passwordReset = undefined;
         await user.save();
         return user;
-      } else throw new BadRequestException('invalid token');
+      } else throw new HttpQueryError(400, 'invalid token');
     }
     return undefined;
   }
@@ -273,13 +286,13 @@ class UsersService {
       if (
         new Date().getTime() > new Date(user.passwordReset.expiration).getTime()
       )
-        throw new BadRequestException('token expired');
+        throw new HttpQueryError(400, 'token expired');
       if (user.emailReset && user.emailReset.token === code) {
         user.email = newEmail;
         user.email_enabled = false;
         await user.save();
         return user;
-      } else throw new BadRequestException('invalid token');
+      } else throw new HttpQueryError(400, 'invalid token');
     }
     return undefined;
   }
@@ -299,12 +312,12 @@ class UsersService {
       if (
         new Date().getTime() > new Date(user.validateEmail.expiration).getTime()
       )
-        throw new BadRequestException('token expired');
+        throw new HttpQueryError(400, 'token expired');
       if (user.validateEmail.token === code) {
         user.email_enabled = true;
         await user.save();
         return user;
-      } else throw new BadRequestException('invalid token');
+      } else throw new HttpQueryError(400, 'invalid token');
     }
     return undefined;
   }
@@ -317,16 +330,22 @@ class UsersService {
    **/
   async validateEmailVerification(email: string): Promise<boolean> {
     const user = await this.findOneByEmail(email);
-    if (!user) throw new BadRequestException('email address is not found');
+    if (!user) throw new HttpQueryError(400, 'email address is not found');
     if (user.enabled === false) return false;
-    const token = randomBytes(10).toString('hex');
+    const token = randomBytes(3).toString('hex');
     // one day for expiration of reset token
     const expiration = new Date(Date().valueOf() + 24 * 60 * 60 * 1000);
     const mailOptions: SendMailOptions = {
       from: this.configService.get('EMAIL_USERNAME'),
       to: email,
       subject: `Validate Email Address`,
-      text: `${user.username}, validate your email address : ${token} \n please note this token is invalid after 24 hours of generate `,
+      html: `
+
+        <h1 style="text-align:center">Saarthi</h1><br/>
+        <p style="text-align:center"> <small>Your Future, Our Commitment</small></p>
+        <p></p>
+        <p style="text-align:center">${user.username}, Validate  your email address with this : ${token} <br/><small> please note this token is invalid after 24 hours of generate</small></p>
+`,
     };
     return new Promise((resolve, reject) => {
       return this.utilityService.sendMailMethod(mailOptions).then((res) => {
@@ -341,6 +360,15 @@ class UsersService {
           );
       });
     });
+  }
+  /***
+   * Returns if the user is admin or not
+   * @param {string} usertype
+   * @returns {boolean}
+   * @memberof UsersService
+   **/
+  isEmployer(userType: string): boolean {
+    return userType === UserTypeEnum.employer;
   }
 }
 

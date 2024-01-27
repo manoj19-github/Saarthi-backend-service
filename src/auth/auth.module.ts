@@ -1,3 +1,4 @@
+import { AutuhResolver } from './auth.resolver';
 import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
@@ -26,7 +27,7 @@ import { UtilityModule } from 'src/utility/utility.module';
     ConfigModule,
     UtilityModule,
   ],
-  providers: [AuthService],
+  providers: [AutuhResolver, AuthService],
   exports: [AuthService],
 })
 export class AuthModule {}

@@ -6,14 +6,15 @@ type UsersDocument {
   userType: String!
   enabled: Boolean!
   email_enabled: Boolean!
-  is_registered: Boolean!
   email: String!
   password: String!
+  is_registered: Boolean!
   lowercaseUsername: String!
   username: String!
   passwordReset: JSONObject!
   emailReset: JSONObject!
   validateEmail: JSONObject!
+  permission: [String!]!
 }
 
 """
@@ -21,11 +22,93 @@ The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](
 """
 scalar JSONObject
 
+type LoginResult {
+  user: UsersDocument!
+  token: String!
+}
+
+type CountryDocument {
+  Country_name: String!
+}
+
+type StateDocument {
+  State_name: String!
+  country: CountryDocument!
+}
+
+type CityDocument {
+  city_name: String!
+  state: StateDocument!
+  country: CountryDocument!
+}
+
+type LocationDocument {
+  latitude: String!
+  longitude: String!
+  location_name: String!
+  address_line_1: String!
+  address_line_2: String!
+  pin_code: Int!
+  city: CityDocument!
+}
+
+type CandidateDocument {
+  first_name: String!
+  last_name: String!
+  location: LocationDocument!
+  user: UsersDocument!
+  secondary_email: String!
+  primary_contact_no: String!
+  secondary_contact_no: String!
+}
+
+type CourseDocument {
+  course_name: String!
+  other_name: String!
+}
+
+type EducationDocument {
+  grade: String!
+  marks: String!
+  marksUnit: String!
+  course: CourseDocument!
+  additional_qualification: [String!]!
+  start_period: DateTime!
+  end_period: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type LanguageDocument {
+  name: String!
+}
+
+type ImageDocument {
+  user: UsersDocument!
+  image_url: String!
+}
+
+type JobCategoryDocument {
+  category_name: String!
+  category_image: ImageDocument!
+}
+
 type Query {
   users: [UsersDocument!]!
   user(username: String!, email: String!): UsersDocument!
   forgotPassword(email: String!): Boolean!
   changeEmailAddress(email: String!): Boolean!
+  login(user: LoginUserInput!): LoginResult!
+  refreshToken: LoginResult!
+}
+
+input LoginUserInput {
+  username: String!
+  email: String!
+  password: String!
 }
 
 type Mutation {
