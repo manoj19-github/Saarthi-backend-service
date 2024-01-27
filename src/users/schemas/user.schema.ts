@@ -6,6 +6,7 @@ import { Document } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import { Validators } from 'src/lib/validators';
+import { GraphQLID } from 'graphql';
 export enum UserTypeEnum {
   candidate = 'candidate',
   employer = 'employer',
@@ -66,6 +67,8 @@ export class EmailResetDocument {
 
 @ObjectType()
 export class UsersDocument extends Document {
+  @Field(() => GraphQLID)
+  _id: string;
   @Field()
   userType: string;
   @Field()

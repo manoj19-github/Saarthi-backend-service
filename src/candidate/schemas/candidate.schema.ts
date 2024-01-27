@@ -4,6 +4,8 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 import { Validators } from 'src/lib/validators';
 import { LocationDocument } from 'src/location/schemas/location.schema';
 import { UsersDocument } from 'src/users/schemas/user.schema';
+import { CandidateProfileDocument } from './candidateProfile.schema';
+import { GraphQLID } from 'graphql';
 
 @Schema({ timestamps: true })
 export class CandidateSchema {
@@ -11,6 +13,8 @@ export class CandidateSchema {
   first_name: string;
   @Prop({ type: String, required: true })
   last_name: string;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'candidateProfiles' })
+  candidate_profile: MongooseSchema.Types.ObjectId;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'locations' })
   location: string;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'users' })
@@ -32,10 +36,14 @@ export class CandidateSchema {
 
 @ObjectType()
 export class CandidateDocument extends Document {
+  @Field(() => GraphQLID)
+  _id: string;
   @Field()
   first_name: string;
   @Field()
   last_name: string;
+  @Field(() => CandidateProfileDocument)
+  candidate_profile: CandidateProfileDocument;
   @Field(() => LocationDocument!)
   location: LocationDocument;
   @Field(() => UsersDocument)

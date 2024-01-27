@@ -2,6 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { CourseDocument } from './course.schema';
+import { GraphQLID } from 'graphql';
 
 @Schema({ timestamps: true })
 export class EducationSchema {
@@ -23,6 +24,8 @@ export class EducationSchema {
 
 @ObjectType()
 export class EducationDocument extends Document {
+  @Field(() => GraphQLID)
+  _id: string;
   @Field()
   grade: string;
   @Field()

@@ -2,6 +2,7 @@ import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { CityDocument } from './city.schema';
+import { GraphQLID } from 'graphql';
 
 @Schema({ timestamps: true })
 export class LocationSchema {
@@ -23,6 +24,8 @@ export class LocationSchema {
 
 @ObjectType()
 export class LocationDocument extends Document {
+  @Field(() => GraphQLID)
+  _id: string;
   @Field()
   latitude: string;
   @Field()

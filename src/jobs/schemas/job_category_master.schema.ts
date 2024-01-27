@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { GraphQLID } from 'graphql';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { ImageDocument } from 'src/images/schemas/images.schema';
 
@@ -13,6 +14,8 @@ export class JobCategorySchema {
 
 @ObjectType()
 export class JobCategoryDocument extends Document {
+  @Field(() => GraphQLID)
+  _id: string;
   @Field()
   category_name: string;
   @Field(() => ImageDocument!)

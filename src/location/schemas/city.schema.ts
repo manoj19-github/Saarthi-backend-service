@@ -3,6 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { StateDocument } from './state.schema';
 import { CountryDocument } from './country.schema';
+import { GraphQLID } from 'graphql';
 
 @Schema({ timestamps: true })
 export class CitySchema {
@@ -15,10 +16,12 @@ export class CitySchema {
 }
 @ObjectType()
 export class CityDocument extends Document {
+  @Field(() => GraphQLID)
+  _id: string;
   @Field()
   city_name: string;
-  @Field(() => StateDocument)
-  state: StateDocument;
+  @Field(() => StateDocument, { nullable: true })
+  state?: StateDocument;
   @Field(() => CountryDocument!)
   country: CountryDocument;
 }

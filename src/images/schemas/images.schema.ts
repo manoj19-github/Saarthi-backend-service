@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { GraphQLID } from 'graphql';
 import { Schema as MongooseSchema, Document } from 'mongoose';
 import { UsersDocument } from 'src/users/schemas/user.schema';
 
@@ -13,6 +14,8 @@ export class ImagesSchema {
 
 @ObjectType()
 export class ImageDocument extends Document {
+  @Field(() => GraphQLID)
+  _id: string;
   @Field(() => UsersDocument)
   user: UsersDocument;
   @Field(() => String!)

@@ -2,7 +2,8 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { CompanyDocument } from 'src/company/schema/company.schema';
-import { ExperienceMasterDocument } from './experienceYearMaster.schema';
+import { ExperienceMasterDocument } from '../../company/experienceYearMaster.schema';
+import { GraphQLID } from 'graphql';
 
 @Schema({ timestamps: true })
 export class ExperienceSchema {
@@ -18,6 +19,8 @@ export class ExperienceSchema {
 
 @ObjectType()
 export class ExperienceDocument extends Document {
+  @Field(() => GraphQLID)
+  _id: string;
   @Field(() => CompanyDocument)
   company: CompanyDocument;
   @Field(() => ExperienceMasterDocument)

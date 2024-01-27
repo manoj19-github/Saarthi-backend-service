@@ -3,6 +3,7 @@
 # ------------------------------------------------------
 
 type UsersDocument {
+  _id: ID!
   userType: String!
   enabled: Boolean!
   email_enabled: Boolean!
@@ -28,21 +29,25 @@ type LoginResult {
 }
 
 type CountryDocument {
+  _id: ID!
   Country_name: String!
 }
 
 type StateDocument {
+  _id: ID!
   State_name: String!
   country: CountryDocument!
 }
 
 type CityDocument {
+  _id: ID!
   city_name: String!
-  state: StateDocument!
+  state: StateDocument
   country: CountryDocument!
 }
 
 type LocationDocument {
+  _id: ID!
   latitude: String!
   longitude: String!
   location_name: String!
@@ -52,22 +57,14 @@ type LocationDocument {
   city: CityDocument!
 }
 
-type CandidateDocument {
-  first_name: String!
-  last_name: String!
-  location: LocationDocument!
-  user: UsersDocument!
-  secondary_email: String!
-  primary_contact_no: String!
-  secondary_contact_no: String!
-}
-
 type CourseDocument {
+  _id: ID!
   course_name: String!
   other_name: String!
 }
 
 type EducationDocument {
+  _id: ID!
   grade: String!
   marks: String!
   marksUnit: String!
@@ -83,17 +80,59 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type LanguageDocument {
+  _id: ID!
   name: String!
 }
 
 type ImageDocument {
+  _id: ID!
   user: UsersDocument!
   image_url: String!
 }
 
 type JobCategoryDocument {
+  _id: ID!
   category_name: String!
   category_image: ImageDocument!
+}
+
+type CandidateProfileDocument {
+  _id: ID!
+  candidate: CandidateDocument!
+  website_link: String!
+  educations: [EducationDocument!]!
+  languages: [LanguageDocument!]!
+  description: String!
+  total_year_of_experience: String!
+  career_objective: String!
+  profile_image: ImageDocument!
+  social_network_urls: [JSONObject!]!
+  current_job_category: JobCategoryDocument!
+}
+
+type CandidateDocument {
+  _id: ID!
+  first_name: String!
+  last_name: String!
+  candidate_profile: CandidateProfileDocument!
+  location: LocationDocument!
+  user: UsersDocument!
+  secondary_email: String!
+  primary_contact_no: String!
+  secondary_contact_no: String!
+}
+
+type CompanyDocument {
+  _id: ID!
+  company_name: String!
+  other_name: String!
+  social_network_urls: [JSONObject!]!
+}
+
+type ExperienceMasterDocument {
+  _id: ID!
+  lower_limit: String!
+  upper_limit: String!
 }
 
 type Query {

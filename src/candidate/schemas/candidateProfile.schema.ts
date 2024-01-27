@@ -6,6 +6,8 @@ import { EducationDocument } from 'src/education/schemas/education.schema';
 import { LanguageDocument } from 'src/languages/schemas/language.schema';
 import { ImageDocument } from 'src/images/schemas/images.schema';
 import { JobCategoryDocument } from 'src/jobs/schemas/job_category_master.schema';
+import { GraphQLJSONObject } from 'graphql-type-json';
+import { GraphQLID } from 'graphql';
 
 @Schema({ timestamps: true })
 export class CandidateProfileSchema {
@@ -27,14 +29,24 @@ export class CandidateProfileSchema {
   career_objective: string;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'images' })
   profile_image: MongooseSchema.Types.ObjectId;
-  @Prop({ type: [{ name: String, url: String }] })
-  social_network_urls: { name: string; url: string }[];
+  // @Prop({ type: [{ name: String, url: String }] })
+  // social_network_urls: { name: string; url: string }[];
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'jobcategories' })
   current_job_category: MongooseSchema.Types.ObjectId;
 }
 
 @ObjectType()
+export class SocialNetworkUrl {
+  @Field()
+  name: string;
+  @Field()
+  url: string;
+}
+
+@ObjectType()
 export class CandidateProfileDocument extends Document {
+  @Field(() => GraphQLID)
+  _id: string;
   @Field(() => CandidateDocument)
   candidate: CandidateDocument;
   @Field()
@@ -51,8 +63,8 @@ export class CandidateProfileDocument extends Document {
   career_objective: string;
   @Field(() => ImageDocument)
   profile_image: ImageDocument;
-  @Field(() => [{ name: String, url: String }])
-  social_network_urls: { name: string; url: string }[];
+  @Field(() => [GraphQLJSONObject])
+  social_network_urls: SocialNetworkUrl[];
   @Field(() => JobCategoryDocument)
   current_job_category: JobCategoryDocument;
 }

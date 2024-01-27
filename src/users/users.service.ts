@@ -23,7 +23,7 @@ class UsersService {
    * Returns a user by their unique username or undefined
    *
    *  @param {string} username of user, not case sensitive
-   * @returns {(Promise<UserDocument |undefined)}
+   * @returns {(Promise<UserDocument |undefined>)}
    * @memberof UsersService
    *
    **/
@@ -108,18 +108,22 @@ class UsersService {
           .toLowerCase()
           .includes(createUserInput.email.toLowerCase())
       ) {
-        throw new Error(`email ${createUserInput.email} is already registered`);
+        throw new HttpQueryError(
+          400,
+          `email ${createUserInput.email} is already registered`,
+        );
       } else if (
         error.message
           .toLowerCase()
           .includes(createUserInput.username.toLowerCase())
       ) {
-        throw new Error(
+        throw new HttpQueryError(
+          400,
           ` username ${createUserInput.username} is already registered`,
         );
       }
     }
-    throw new Error(error.message);
+    throw new HttpQueryError(400, error.message);
   }
   /**
    *  Send an email with a password reset code and sets the reset token and expiration on the user.

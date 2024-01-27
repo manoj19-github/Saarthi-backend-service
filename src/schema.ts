@@ -33,6 +33,7 @@ export class ResetEmailInput {
 }
 
 export class UsersDocument {
+    _id: string;
     userType: string;
     enabled: boolean;
     email_enabled: boolean;
@@ -53,21 +54,25 @@ export class LoginResult {
 }
 
 export class CountryDocument {
+    _id: string;
     Country_name: string;
 }
 
 export class StateDocument {
+    _id: string;
     State_name: string;
     country: CountryDocument;
 }
 
 export class CityDocument {
+    _id: string;
     city_name: string;
-    state: StateDocument;
+    state?: Nullable<StateDocument>;
     country: CountryDocument;
 }
 
 export class LocationDocument {
+    _id: string;
     latitude: string;
     longitude: string;
     location_name: string;
@@ -77,22 +82,14 @@ export class LocationDocument {
     city: CityDocument;
 }
 
-export class CandidateDocument {
-    first_name: string;
-    last_name: string;
-    location: LocationDocument;
-    user: UsersDocument;
-    secondary_email: string;
-    primary_contact_no: string;
-    secondary_contact_no: string;
-}
-
 export class CourseDocument {
+    _id: string;
     course_name: string;
     other_name: string;
 }
 
 export class EducationDocument {
+    _id: string;
     grade: string;
     marks: string;
     marksUnit: string;
@@ -103,17 +100,59 @@ export class EducationDocument {
 }
 
 export class LanguageDocument {
+    _id: string;
     name: string;
 }
 
 export class ImageDocument {
+    _id: string;
     user: UsersDocument;
     image_url: string;
 }
 
 export class JobCategoryDocument {
+    _id: string;
     category_name: string;
     category_image: ImageDocument;
+}
+
+export class CandidateProfileDocument {
+    _id: string;
+    candidate: CandidateDocument;
+    website_link: string;
+    educations: EducationDocument[];
+    languages: LanguageDocument[];
+    description: string;
+    total_year_of_experience: string;
+    career_objective: string;
+    profile_image: ImageDocument;
+    social_network_urls: JSONObject[];
+    current_job_category: JobCategoryDocument;
+}
+
+export class CandidateDocument {
+    _id: string;
+    first_name: string;
+    last_name: string;
+    candidate_profile: CandidateProfileDocument;
+    location: LocationDocument;
+    user: UsersDocument;
+    secondary_email: string;
+    primary_contact_no: string;
+    secondary_contact_no: string;
+}
+
+export class CompanyDocument {
+    _id: string;
+    company_name: string;
+    other_name: string;
+    social_network_urls: JSONObject[];
+}
+
+export class ExperienceMasterDocument {
+    _id: string;
+    lower_limit: string;
+    upper_limit: string;
 }
 
 export abstract class IQuery {
