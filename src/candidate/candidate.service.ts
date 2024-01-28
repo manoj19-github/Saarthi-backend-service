@@ -26,7 +26,7 @@ export class CandidateService {
       secondary_email: registerCandidatePayload.secondary_email,
       primary_contact_no: registerCandidatePayload.primary_contact_no,
     });
-    if (!existingCandidateByEmail)
+    if (!!existingCandidateByEmail)
       throw new HttpQueryError(400, 'email already exists');
     return (
       await this.candidateModel.create({

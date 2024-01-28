@@ -11,7 +11,7 @@ import { GraphQLID } from 'graphql';
 
 @Schema({ timestamps: true })
 export class CandidateProfileSchema {
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'candidates' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Candidates' })
   candidate: MongooseSchema.Types.ObjectId;
   @Prop()
   website_link: string;

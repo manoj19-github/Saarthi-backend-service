@@ -13,11 +13,11 @@ export class CandidateSchema {
   first_name: string;
   @Prop({ type: String, required: true })
   last_name: string;
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'candidateProfiles' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'CandidatesProfile' })
   candidate_profile: MongooseSchema.Types.ObjectId;
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'locations' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Location' })
   location: string;
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'users' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
   user: MongooseSchema.Types.ObjectId;
   @Prop({
     validate: { validator: Validators.validateEmail },
