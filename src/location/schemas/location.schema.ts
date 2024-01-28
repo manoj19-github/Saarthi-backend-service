@@ -18,7 +18,7 @@ export class LocationSchema {
   address_line_2: string;
   @Prop({ type: Number, required: true })
   pin_code: number;
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'cities' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'City' })
   city: MongooseSchema.Types.ObjectId;
 }
 

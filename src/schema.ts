@@ -32,6 +32,39 @@ export class ResetEmailInput {
     code: string;
 }
 
+export class AddCountryInput {
+    country_name: string;
+}
+
+export class EditCountryInput {
+    country_id: string;
+    country_name: string;
+}
+
+export class CreateStateInput {
+    state_name: string;
+    country_id: string;
+}
+
+export class EditStateInput {
+    state_name: string;
+    country_id: string;
+    state_id: string;
+}
+
+export class CreateCityInput {
+    city_name: string;
+    state_id: string;
+    country: string;
+}
+
+export class EditCityInput {
+    city_id: string;
+    city_name: string;
+    state_id: string;
+    country_id: string;
+}
+
 export class UsersDocument {
     _id: string;
     userType: string;
@@ -167,6 +200,18 @@ export abstract class IQuery {
     abstract login(user: LoginUserInput): LoginResult | Promise<LoginResult>;
 
     abstract refreshToken(): LoginResult | Promise<LoginResult>;
+
+    abstract countries(): CountryDocument[] | Promise<CountryDocument[]>;
+
+    abstract country(country_id: string): CountryDocument | Promise<CountryDocument>;
+
+    abstract state(state_id: string): StateDocument | Promise<StateDocument>;
+
+    abstract states(): StateDocument[] | Promise<StateDocument[]>;
+
+    abstract cities(): CityDocument[] | Promise<CityDocument[]>;
+
+    abstract city(city_id: string): CityDocument | Promise<CityDocument>;
 }
 
 export abstract class IMutation {
@@ -175,6 +220,24 @@ export abstract class IMutation {
     abstract resetPassword(resetPasswordInput: ResetPasswordInput): UsersDocument | Promise<UsersDocument>;
 
     abstract resetEmailAddress(resetEmailInput: ResetEmailInput): UsersDocument | Promise<UsersDocument>;
+
+    abstract createCountry(addNewCountry: AddCountryInput): CountryDocument | Promise<CountryDocument>;
+
+    abstract editCountry(editCountry: EditCountryInput): CountryDocument | Promise<CountryDocument>;
+
+    abstract deleteCountry(country_id: string): CountryDocument[] | Promise<CountryDocument[]>;
+
+    abstract addNewState(addNewState: CreateStateInput): StateDocument | Promise<StateDocument>;
+
+    abstract editNewState(editStatePayload: EditStateInput): StateDocument | Promise<StateDocument>;
+
+    abstract deleteState(State_id: string): StateDocument[] | Promise<StateDocument[]>;
+
+    abstract addNewCity(createCityInput: CreateCityInput): CityDocument | Promise<CityDocument>;
+
+    abstract editCity(editCityInput: EditCityInput): CityDocument | Promise<CityDocument>;
+
+    abstract deleteCity(city_id: string): CityDocument[] | Promise<CityDocument[]>;
 }
 
 export type JSONObject = any;

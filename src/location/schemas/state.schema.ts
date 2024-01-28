@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { CountryDocument } from './country.schema';
@@ -8,7 +8,7 @@ import { GraphQLID } from 'graphql';
 export class StateSchema {
   @Prop()
   State_name: string;
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'countries' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Country' })
   country: MongooseSchema.Types.ObjectId;
 }
 @ObjectType()

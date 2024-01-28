@@ -9,9 +9,9 @@ import { GraphQLID } from 'graphql';
 export class CitySchema {
   @Prop()
   city_name: string;
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'states' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'State' })
   state: MongooseSchema.Types.ObjectId;
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'countries' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Country' })
   country: MongooseSchema.Types.ObjectId;
 }
 @ObjectType()

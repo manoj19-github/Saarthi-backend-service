@@ -142,6 +142,12 @@ type Query {
   changeEmailAddress(email: String!): Boolean!
   login(user: LoginUserInput!): LoginResult!
   refreshToken: LoginResult!
+  countries: [CountryDocument!]!
+  country(country_id: String!): CountryDocument!
+  state(state_id: String!): StateDocument!
+  states: [StateDocument!]!
+  cities: [CityDocument!]!
+  city(city_id: String!): CityDocument!
 }
 
 input LoginUserInput {
@@ -154,6 +160,15 @@ type Mutation {
   createUser(createUserInput: CreateUserInput!): UsersDocument!
   resetPassword(resetPasswordInput: ResetPasswordInput!): UsersDocument!
   resetEmailAddress(resetEmailInput: ResetEmailInput!): UsersDocument!
+  createCountry(addNewCountry: AddCountryInput!): CountryDocument!
+  editCountry(editCountry: EditCountryInput!): CountryDocument!
+  deleteCountry(country_id: String!): [CountryDocument!]!
+  addNewState(addNewState: CreateStateInput!): StateDocument!
+  editNewState(editStatePayload: EditStateInput!): StateDocument!
+  deleteState(State_id: String!): [StateDocument!]!
+  addNewCity(createCityInput: CreateCityInput!): CityDocument!
+  editCity(editCityInput: EditCityInput!): CityDocument!
+  deleteCity(city_id: String!): [CityDocument!]!
 }
 
 input CreateUserInput {
@@ -172,4 +187,37 @@ input ResetEmailInput {
   oldEmail: String!
   newEmail: String!
   code: String!
+}
+
+input AddCountryInput {
+  country_name: String!
+}
+
+input EditCountryInput {
+  country_id: ID!
+  country_name: String!
+}
+
+input CreateStateInput {
+  state_name: String!
+  country_id: ID!
+}
+
+input EditStateInput {
+  state_name: String!
+  country_id: ID!
+  state_id: ID!
+}
+
+input CreateCityInput {
+  city_name: String!
+  state_id: ID!
+  country: ID!
+}
+
+input EditCityInput {
+  city_id: ID!
+  city_name: String!
+  state_id: ID!
+  country_id: ID!
 }
