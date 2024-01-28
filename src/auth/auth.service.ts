@@ -33,7 +33,7 @@ export class AuthService {
     );
     if (!userDetails) throw new HttpQueryError(400, 'email not found');
     if (!userDetails.enabled) throw new HttpQueryError(400, 'User is blocked');
-    if (loginPayload.username === userDetails.username)
+    if (loginPayload.username !== userDetails.username)
       throw new HttpQueryError(400, 'username is invalid');
     let isPasswordMatched = false;
     try {
