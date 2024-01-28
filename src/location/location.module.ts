@@ -10,6 +10,8 @@ import { StateResolver } from './state.resolver';
 import { StateService } from './state.service';
 import { CityResolver } from './city.resolver';
 import { CityService } from './city.service';
+import { LocationResolver } from './location.resolver';
+import { LocationService } from './location.service';
 
 @Module({
   imports: [
@@ -22,9 +24,11 @@ import { CityService } from './city.service';
     CountryResolver,
     StateResolver,
     CityResolver,
+    LocationResolver,
     StateService,
     CountryService,
     CityService,
+    LocationService,
   ],
 })
 export class LocationModule {}

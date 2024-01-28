@@ -5,6 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import ExperienceModel from './schemas/experience.schema';
 import ExpereinceMasterModel from '../company/experienceYearMaster.schema';
 import { ConfigModule } from '@nestjs/config';
+import { CandidateResolver } from './candidate.resolver';
+import { CandidateService } from './candidate.service';
 
 @Module({
   imports: [
@@ -20,6 +22,6 @@ import { ConfigModule } from '@nestjs/config';
     ]),
     ConfigModule,
   ],
-  providers: [],
+  providers: [CandidateResolver, CandidateService],
 })
 export class CandidateModule {}

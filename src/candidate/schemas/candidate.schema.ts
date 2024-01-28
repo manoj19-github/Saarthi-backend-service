@@ -44,15 +44,15 @@ export class CandidateDocument extends Document {
   last_name: string;
   @Field(() => CandidateProfileDocument)
   candidate_profile: CandidateProfileDocument;
-  @Field(() => LocationDocument!)
-  location: LocationDocument;
+  @Field(() => LocationDocument, { nullable: true })
+  location?: LocationDocument;
   @Field(() => UsersDocument)
   user: UsersDocument;
   @Field()
   secondary_email: string;
-  @Field(() => String!)
-  primary_contact_no: string;
   @Field()
+  primary_contact_no: string;
+  @Field({ nullable: true })
   secondary_contact_no: string;
 }
 const CandidateModel = SchemaFactory.createForClass(CandidateSchema);

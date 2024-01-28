@@ -32,6 +32,28 @@ export class ResetEmailInput {
     code: string;
 }
 
+export class RegisterCandidateInput {
+    first_name: string;
+    last_name: string;
+    location?: Nullable<string>;
+    user: string;
+    secondary_email?: Nullable<string>;
+    primary_contact_no: string;
+    secondary_contact_no?: Nullable<string>;
+    candidate_profile?: Nullable<string>;
+}
+
+export class EditRegisterCandiateInput {
+    candidate_id: string;
+    first_name?: Nullable<string>;
+    last_name?: Nullable<string>;
+    location?: Nullable<string>;
+    secondary_email?: Nullable<string>;
+    primary_contact_no?: Nullable<string>;
+    secondary_contact_no?: Nullable<string>;
+    candidate_profile?: Nullable<string>;
+}
+
 export class AddCountryInput {
     country_name: string;
 }
@@ -63,6 +85,27 @@ export class EditCityInput {
     city_name: string;
     state_id: string;
     country_id: string;
+}
+
+export class CreateLocationInput {
+    latitude: string;
+    longitude: string;
+    location_name: string;
+    address_line_1: string;
+    address_line_2?: Nullable<string>;
+    pin_code: number;
+    city: string;
+}
+
+export class EditLocationInput {
+    latitude?: Nullable<string>;
+    longitude?: Nullable<string>;
+    location_name?: Nullable<string>;
+    address_line_1?: Nullable<string>;
+    address_line_2?: Nullable<string>;
+    pin_code?: Nullable<number>;
+    city?: Nullable<string>;
+    location_id: string;
 }
 
 export class UsersDocument {
@@ -168,11 +211,11 @@ export class CandidateDocument {
     first_name: string;
     last_name: string;
     candidate_profile: CandidateProfileDocument;
-    location: LocationDocument;
+    location?: Nullable<LocationDocument>;
     user: UsersDocument;
     secondary_email: string;
     primary_contact_no: string;
-    secondary_contact_no: string;
+    secondary_contact_no?: Nullable<string>;
 }
 
 export class CompanyDocument {
@@ -201,6 +244,10 @@ export abstract class IQuery {
 
     abstract refreshToken(): LoginResult | Promise<LoginResult>;
 
+    abstract candidate(candidate_id: string): CandidateDocument | Promise<CandidateDocument>;
+
+    abstract candidates(): CandidateDocument[] | Promise<CandidateDocument[]>;
+
     abstract countries(): CountryDocument[] | Promise<CountryDocument[]>;
 
     abstract country(country_id: string): CountryDocument | Promise<CountryDocument>;
@@ -212,6 +259,10 @@ export abstract class IQuery {
     abstract cities(): CityDocument[] | Promise<CityDocument[]>;
 
     abstract city(city_id: string): CityDocument | Promise<CityDocument>;
+
+    abstract locations(): LocationDocument[] | Promise<LocationDocument[]>;
+
+    abstract location(location_id: string): LocationDocument | Promise<LocationDocument>;
 }
 
 export abstract class IMutation {
@@ -220,6 +271,10 @@ export abstract class IMutation {
     abstract resetPassword(resetPasswordInput: ResetPasswordInput): UsersDocument | Promise<UsersDocument>;
 
     abstract resetEmailAddress(resetEmailInput: ResetEmailInput): UsersDocument | Promise<UsersDocument>;
+
+    abstract registerCandidate(registerCandidate: RegisterCandidateInput): CandidateDocument | Promise<CandidateDocument>;
+
+    abstract editRegisterCandidate(editRegisterCandidate: EditRegisterCandiateInput): CandidateDocument | Promise<CandidateDocument>;
 
     abstract createCountry(addNewCountry: AddCountryInput): CountryDocument | Promise<CountryDocument>;
 
@@ -238,6 +293,12 @@ export abstract class IMutation {
     abstract editCity(editCityInput: EditCityInput): CityDocument | Promise<CityDocument>;
 
     abstract deleteCity(city_id: string): CityDocument[] | Promise<CityDocument[]>;
+
+    abstract createLocation(createNewLocationPayload: CreateLocationInput): LocationDocument | Promise<LocationDocument>;
+
+    abstract editLocation(editLocation: EditLocationInput): LocationDocument | Promise<LocationDocument>;
+
+    abstract deleteLocation(location_id: string): LocationDocument[] | Promise<LocationDocument[]>;
 }
 
 export type JSONObject = any;

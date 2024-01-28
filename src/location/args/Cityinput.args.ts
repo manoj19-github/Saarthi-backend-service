@@ -1,10 +1,10 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 @InputType()
 export class CreateCityInput {
   @Field()
-  @IsString()
+  @IsOptional()
   city_name: string;
   @Field(() => ID)
   @IsOptional()
@@ -20,8 +20,8 @@ export class EditCityInput {
   @IsNotEmpty()
   city_id: string;
   @Field()
-  @IsString()
-  city_name: string;
+  @IsOptional()
+  city_name?: string;
   @Field(() => ID)
   @IsOptional()
   state_id?: string;

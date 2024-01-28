@@ -27,14 +27,20 @@ export class CityService {
    *
    *   **/
   async addOrEditCityService(
-    city_name: string,
     country_id: string,
+    city_name?: string,
     state_id?: string,
     city_id?: string,
   ): Promise<CityDocument> {
-    const payload: any = { city_name, country: country_id };
+    const payload: any = { country: country_id };
+
     if (state_id) payload['state'] = state_id;
+    if (city_name) payload['city_name'] = city_name;
     if (!city_id) {
+      if (!city_name) throw new HttpQueryError(400, 'City name is missing');
+      const isCityExistsByName = await this.CityModel.findOne({ city_name });
+      if (!!isCityExistsByName)
+        throw new HttpQueryError(400, 'City already exists');
       await this.CityModel.create({ ...payload });
       return this.CityModel.findOne({ city_name })
         .populate('state')
@@ -42,6 +48,12 @@ export class CityService {
     } else {
       const isCityExists = await this.CityModel.findById(city_id);
       if (!isCityExists) throw new HttpQueryError(400, 'City not exists');
+      if (city_name) {
+        const isCityExistsByName = await this.CityModel.findOne({ city_name });
+        if (!!isCityExistsByName)
+          throw new HttpQueryError(400, 'City already exists');
+      }
+
       return await this.CityModel.findByIdAndUpdate(
         { city_id },
         { $set: { ...payload } },

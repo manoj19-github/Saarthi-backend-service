@@ -37,9 +37,18 @@ export class LocationService {
     });
     if (isLocationExists)
       throw new HttpQueryError(400, 'location already exists');
-    return (await this.LocationModel.create(createLocationInput)).populate(
-      'city',
-    );
+    await this.LocationModel.create(createLocationInput);
+    return await this.LocationModel.findOne({
+      location_name: createLocationInput.location_name,
+    }).populate({
+      path: 'city',
+      model: 'City',
+      populate: {
+        path: 'state',
+        model: 'State',
+        populate: { path: 'country', model: 'Country' },
+      },
+    });
   }
   /***
    * edit location data
@@ -62,14 +71,22 @@ export class LocationService {
     );
     delete editLocationDetails.location_id;
     if (Object.keys(editableLocationPayload).length > 0)
-      return await this.LocationModel.findOneAndUpdate(
+      await this.LocationModel.findOneAndUpdate(
         { _id: editLocationDetails.location_id },
         { $set: { ...editableLocationPayload } },
         { returnDocument: 'after' },
-      ).populate('city');
+      );
     return await this.LocationModel.findById(
       editLocationDetails.location_id,
-    ).populate('city');
+    ).populate({
+      path: 'city',
+      model: 'City',
+      populate: {
+        path: 'state',
+        model: 'State',
+        populate: { path: 'country', model: 'Country' },
+      },
+    });
   }
 
   /**
@@ -86,10 +103,15 @@ export class LocationService {
     const isLocationExists = await this.LocationModel.findById(location_id);
     if (!isLocationExists) throw new HttpQueryError(400, 'location not found');
     await this.LocationModel.findByIdAndDelete(location_id);
-    return await this.LocationModel.find()
-      .populate('city')
-      .populate({ path: 'state', model: 'states' })
-      .populate({ path: 'country', model: 'countries' });
+    return await this.LocationModel.find().populate({
+      path: 'city',
+      model: 'City',
+      populate: {
+        path: 'state',
+        model: 'State',
+        populate: { path: 'country', model: 'Country' },
+      },
+    });
   }
 
   /***
@@ -101,10 +123,15 @@ export class LocationService {
    *
    * ***/
   async getAllLocations(): Promise<LocationDocument[]> {
-    return await this.LocationModel.find()
-      .populate('city')
-      .populate({ path: 'state', model: 'states' })
-      .populate({ path: 'country', model: 'countries' });
+    return await this.LocationModel.find().populate({
+      path: 'city',
+      model: 'City',
+      populate: {
+        path: 'state',
+        model: 'State',
+        populate: { path: 'country', model: 'Country' },
+      },
+    });
   }
   /***
    * get location by id
@@ -116,9 +143,14 @@ export class LocationService {
   async getLocationServiceById(
     location_id: string,
   ): Promise<LocationDocument | undefined> {
-    return await this.LocationModel.findById(location_id)
-      .populate('city')
-      .populate({ path: 'state', model: 'states' })
-      .populate({ path: 'country', model: 'countries' });
+    return await this.LocationModel.findById(location_id).populate({
+      path: 'city',
+      model: 'City',
+      populate: {
+        path: 'state',
+        model: 'State',
+        populate: { path: 'country', model: 'Country' },
+      },
+    });
   }
 }

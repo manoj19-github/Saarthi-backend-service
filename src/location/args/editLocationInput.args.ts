@@ -4,25 +4,25 @@ import { IsNotEmpty, IsOptional } from 'class-validator';
 
 @InputType()
 export class EditLocationInput {
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   latitude?: string;
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   longitude?: string;
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   location_name?: string;
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   address_line_1?: string;
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   address_line_2?: string;
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   pin_code?: number;
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   city?: string;
   @Field(() => ID)

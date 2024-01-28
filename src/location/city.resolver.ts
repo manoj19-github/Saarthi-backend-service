@@ -13,8 +13,9 @@ export class CityResolver {
     createCityPayload: CreateCityInput,
   ) {
     return this.cityService.addOrEditCityService(
-      createCityPayload.city_name,
+ 
       createCityPayload.country,
+      createCityPayload.city_name,
       createCityPayload.state_id,
     );
   }
@@ -23,8 +24,8 @@ export class CityResolver {
     @Args('editCityInput', new ValidationPipe()) editCityInput: EditCityInput,
   ) {
     return this.cityService.addOrEditCityService(
-      editCityInput.city_name,
       editCityInput.country_id,
+      editCityInput.city_name,
       editCityInput.state_id,
       editCityInput.city_id,
     );

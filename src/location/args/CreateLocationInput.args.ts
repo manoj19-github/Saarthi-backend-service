@@ -1,6 +1,12 @@
 /* eslint-disable prettier/prettier */
-import { Field, InputType } from '@nestjs/graphql';
-import { IsNumber, IsOptional, IsPostalCode, IsString } from 'class-validator';
+import { Field, ID, InputType } from '@nestjs/graphql';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPostalCode,
+  IsString,
+} from 'class-validator';
 
 @InputType()
 export class CreateLocationInput {
@@ -16,14 +22,13 @@ export class CreateLocationInput {
   @Field()
   @IsString()
   address_line_1: string;
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
-  address_line_2: string;
+  address_line_2?: string;
   @Field()
   @IsNumber()
-  @IsPostalCode()
   pin_code: number;
-  @Field()
-  @IsString()
+  @Field(() => ID)
+  @IsNotEmpty()
   city: string;
 }

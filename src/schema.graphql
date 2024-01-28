@@ -115,11 +115,11 @@ type CandidateDocument {
   first_name: String!
   last_name: String!
   candidate_profile: CandidateProfileDocument!
-  location: LocationDocument!
+  location: LocationDocument
   user: UsersDocument!
   secondary_email: String!
   primary_contact_no: String!
-  secondary_contact_no: String!
+  secondary_contact_no: String
 }
 
 type CompanyDocument {
@@ -142,12 +142,16 @@ type Query {
   changeEmailAddress(email: String!): Boolean!
   login(user: LoginUserInput!): LoginResult!
   refreshToken: LoginResult!
+  candidate(candidate_id: String!): CandidateDocument!
+  candidates: [CandidateDocument!]!
   countries: [CountryDocument!]!
   country(country_id: String!): CountryDocument!
   state(state_id: String!): StateDocument!
   states: [StateDocument!]!
   cities: [CityDocument!]!
   city(city_id: String!): CityDocument!
+  locations: [LocationDocument!]!
+  location(location_id: String!): LocationDocument!
 }
 
 input LoginUserInput {
@@ -160,6 +164,8 @@ type Mutation {
   createUser(createUserInput: CreateUserInput!): UsersDocument!
   resetPassword(resetPasswordInput: ResetPasswordInput!): UsersDocument!
   resetEmailAddress(resetEmailInput: ResetEmailInput!): UsersDocument!
+  registerCandidate(registerCandidate: RegisterCandidateInput!): CandidateDocument!
+  editRegisterCandidate(editRegisterCandidate: EditRegisterCandiateInput!): CandidateDocument!
   createCountry(addNewCountry: AddCountryInput!): CountryDocument!
   editCountry(editCountry: EditCountryInput!): CountryDocument!
   deleteCountry(country_id: String!): [CountryDocument!]!
@@ -169,6 +175,9 @@ type Mutation {
   addNewCity(createCityInput: CreateCityInput!): CityDocument!
   editCity(editCityInput: EditCityInput!): CityDocument!
   deleteCity(city_id: String!): [CityDocument!]!
+  createLocation(createNewLocationPayload: CreateLocationInput!): LocationDocument!
+  editLocation(editLocation: EditLocationInput!): LocationDocument!
+  deleteLocation(location_id: String!): [LocationDocument!]!
 }
 
 input CreateUserInput {
@@ -187,6 +196,28 @@ input ResetEmailInput {
   oldEmail: String!
   newEmail: String!
   code: String!
+}
+
+input RegisterCandidateInput {
+  first_name: String!
+  last_name: String!
+  location: ID
+  user: ID!
+  secondary_email: String
+  primary_contact_no: String!
+  secondary_contact_no: String
+  candidate_profile: ID
+}
+
+input EditRegisterCandiateInput {
+  candidate_id: ID!
+  first_name: String
+  last_name: String
+  location: ID
+  secondary_email: String
+  primary_contact_no: String
+  secondary_contact_no: String
+  candidate_profile: ID
 }
 
 input AddCountryInput {
@@ -220,4 +251,25 @@ input EditCityInput {
   city_name: String!
   state_id: ID!
   country_id: ID!
+}
+
+input CreateLocationInput {
+  latitude: String!
+  longitude: String!
+  location_name: String!
+  address_line_1: String!
+  address_line_2: String
+  pin_code: Float!
+  city: ID!
+}
+
+input EditLocationInput {
+  latitude: String
+  longitude: String
+  location_name: String
+  address_line_1: String
+  address_line_2: String
+  pin_code: Float
+  city: String
+  location_id: ID!
 }
