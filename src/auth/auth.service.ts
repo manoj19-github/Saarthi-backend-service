@@ -63,6 +63,8 @@ export class AuthService {
   async validateJWTPayload(
     payload: JWTPayload,
   ): Promise<UsersDocument | undefined> {
+    if (new Date().getTime() > new Date(payload.expiration).getTime())
+      throw new HttpQueryError(400, 'token expired');
     // please ensure that user is exists and their account is not disabled
     const user = await this.usersService.findOneByEmail(payload.email);
     if (user && user.enabled) return user;
